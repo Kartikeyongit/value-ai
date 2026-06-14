@@ -13,9 +13,9 @@ services:
           name: valueai-postgres
           property: connectionString
       - key: JWT_SECRET
-        generateValue: true
+        value: change-this-in-render-dashboard-to-random-64-char-string
       - key: ENCRYPTION_KEY
-        generateValue: true
+        value: change-this-in-render-dashboard-to-32-byte-string
     healthCheckPath: /health
 
   - type: web
@@ -38,8 +38,4 @@ databases:
   - name: valueai-postgres
     databaseName: valueai
     user: valueai
-    plan: free
-
-redis:
-  - name: valueai-redis
     plan: free
