@@ -1,109 +1,167 @@
-# ValueAI Free Deployment Guide
+# ValueAI Split Deployment Guide
 
-## Architecture (All Free)
+## Architecture
 
-| Service | Provider | Purpose | Cost |
-|---------|----------|---------|------|
-| Frontend | Vercel | React app hosting | FREE |
-| Backend | Cyclic | Node.js API | FREE |
-| Database | Supabase | PostgreSQL | FREE |
-| Redis | None | Optional (disabled) | FREE |
+| Service | Provider | Cost | URL |
+|---------|----------|------|-----|
+| Frontend | Vercel | FREE | https://valueai-yourname.vercel.app |
+| Backend | Render | $7/month | https://valueai-backend.onrender.com |
+| Database | Supabase | FREE | postgresql://...supabase.co |
 
-## Step 1: Prepare Your Code
+---
+
+## Step 1: Push to GitHub
 
 ```bash
 cd /mnt/c/Users/gauta/Downloads/github-projects/value-ai
-
-# Backend now works without Redis (graceful fallback)
-# Just make sure your .env has DATABASE_URL
-
-# Push to GitHub
 git add .
-git commit -m "Make Redis optional for free deploy"
+git commit -m "Split deploy: Vercel + Render + Supabase"
 git push origin main
 ```
 
-## Step 2: Create Supabase Database (Free)
+---
+
+## Step 2: Create Supabase Database (FREE)
 
 1. Go to https://supabase.com
 2. Sign up with GitHub
 3. Click "New Project"
-4. Name: valueai
-5. Region: closest to you
-6. Plan: Free
-7. Wait ~2 minutes for database creation
-8. Go to Settings > Database > Connection String
-9. Copy the URI (looks like: postgresql://postgres:password@db.xxx.supabase.co:5432/postgres)
+   - Name: valueai
+   - Region: closest to you (e.g., Singapore for India)
+   - Plan: Free
+4. Wait 2 minutes for database creation
+5. Go to Project Settings > Database > Connection String
+6. Copy the URI (looks like):
+   ```
+   postgresql://postgres:YOUR_PASSWORD@db.xxxxxxxx.supabase.co:5432/postgres
+   ```
+7. Save this somewhere - you'll need it twice
 
-## Step 3: Deploy Backend on Cyclic (Free)
+---
 
-1. Go to https://cyclic.sh
+## Step 3: Deploy Backend on Render ($7/month)
+
+1. Go to https://dashboard.render.com
 2. Sign up with GitHub
-3. Click "Link Your Own"
-4. Select your GitHub repo: value-ai
-5. Set root directory: backend/
-6. Add Environment Variables:
-   - DATABASE_URL: (paste Supabase connection string)
-   - JWT_SECRET: (generate at https://randomkeygen.com)
-   - ENCRYPTION_KEY: (generate at https://randomkeygen.com)
-   - NODE_ENV: production
-   - PORT: 3001
-7. Click "Deploy"
-8. Your backend URL: https://your-app-name.cyclic.app
+3. Click "New +" > "Web Service"
+4. Connect your GitHub repo: YOUR_USERNAME/value-ai
+5. Configure:
+   - Name: valueai-backend
+   - Root Directory: backend/
+   - Runtime: Docker
+   - Plan: Starter ($7/month)
+6. Click "Advanced" and add Environment Variables:
+   ```
+   NODE_ENV=production
+   PORT=3001
+   DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@db.xxxxxxxx.supabase.co:5432/postgres
+   JWT_SECRET=generate-64-random-characters-here-change-this-in-production
+   ENCRYPTION_KEY=generate-32-random-characters-here!!!
+   FRONTEND_URL=https://valueai-yourname.vercel.app
+   ```
+7. Click "Create Web Service"
+8. Wait for build (~5 minutes)
+9. Your backend URL: https://valueai-backend.onrender.com
 
-## Step 4: Run Migrations on Cyclic
+---
 
-1. In Cyclic dashboard, go to your app
-2. Click "Logs" > "Terminal"
-3. Run:
+## Step 4: Run Migrations on Render
+
+1. Render dashboard > valueai-backend > Shell
+2. Run:
+   ```bash
    npx prisma migrate deploy
    npx tsx prisma/seed-demo.ts
+   ```
+3. Close shell
 
-## Step 5: Deploy Frontend on Vercel (Free)
+---
+
+## Step 5: Deploy Frontend on Vercel (FREE)
 
 1. Go to https://vercel.com
 2. Sign up with GitHub
 3. Click "Add New Project"
-4. Import your GitHub repo: value-ai
-5. Root Directory: frontend/
-6. Framework Preset: Vite
-7. Build Command: npm run build
-8. Output Directory: dist
-9. Environment Variables:
-   - VITE_API_URL: https://your-app-name.cyclic.app/api/v1
-10. Click "Deploy"
-11. Your frontend URL: https://valueai-yourname.vercel.app
+4. Import your GitHub repo: YOUR_USERNAME/value-ai
+5. Configure:
+   - Root Directory: frontend/
+   - Framework Preset: Vite
+   - Build Command: npm run build
+   - Output Directory: dist
+6. Environment Variables:
+   ```
+   VITE_API_URL=https://valueai-backend.onrender.com/api/v1
+   ```
+7. Click "Deploy"
+8. Wait for build (~2 minutes)
+9. Your frontend URL: https://valueai-yourname.vercel.app
 
-## Step 6: Connect Frontend to Backend
+---
 
-1. In Vercel dashboard > your project > Settings > Environment Variables
-2. Update VITE_API_URL to your actual Cyclic URL
-3. Redeploy: Vercel dashboard > Deployments > Redeploy
+## Step 6: Update CORS on Render
+
+1. Go to Render dashboard > valueai-backend > Environment
+2. Update FRONTEND_URL to your actual Vercel URL:
+   ```
+   FRONTEND_URL=https://valueai-yourname.vercel.app
+   ```
+3. Click "Save Changes" (auto-restarts)
+
+---
 
 ## Your Live URLs
 
-Frontend: https://valueai-yourname.vercel.app
-Backend:  https://your-app-name.cyclic.app
-API:      https://your-app-name.cyclic.app/api/v1
+| Service | URL |
+|---------|-----|
+| Frontend | https://valueai-yourname.vercel.app |
+| Backend API | https://valueai-backend.onrender.com/api/v1 |
+| Health Check | https://valueai-backend.onrender.com/health |
+
+---
 
 ## Free Tier Limits
 
 | Service | Limit |
 |---------|-------|
 | Vercel | 100GB bandwidth, 6000 build minutes/month |
-| Cyclic | 1 app, sleeps after inactivity (cold start ~5s) |
-| Supabase | 500MB database, 2GB file storage, 500K requests/month |
+| Render Starter | 512MB RAM, never sleeps, $7/month |
+| Supabase Free | 500MB database, 2GB file storage, 500K requests/month |
 
-## Keep Backend Alive (Optional)
+---
 
-Cyclic sleeps after inactivity. Use UptimeRobot:
-1. https://uptimerobot.com (free)
-2. Add monitor: https://your-app-name.cyclic.app/health
-3. Check every 5 minutes
+## Keep Backend Alive (Not needed on Render Starter)
+
+Render Starter plan never sleeps, so no need for UptimeRobot.
+Only free Render web services sleep after 15 min.
+
+---
 
 ## Custom Domain (Optional)
 
 1. Buy domain on Namecheap (~$10/year)
-2. Vercel: Project Settings > Domains > Add
-3. Cyclic: App Settings > Custom Domain > Add
+2. Vercel: Project Settings > Domains > Add custom domain
+3. Render: Service Settings > Custom Domains > Add domain
 4. Update DNS records at Namecheap
+5. Update FRONTEND_URL env var on Render
+6. Update VITE_API_URL env var on Vercel
+
+---
+
+## Troubleshooting
+
+### CORS Error in Browser Console
+- Check FRONTEND_URL on Render matches your Vercel URL exactly
+- Include https:// and no trailing slash
+
+### Database Connection Failed
+- Check DATABASE_URL format: postgresql://user:pass@host:5432/db
+- Make sure Supabase project is active (not paused)
+
+### Frontend Shows "No data"
+- Check VITE_API_URL on Vercel points to correct Render URL
+- Check backend health: https://valueai-backend.onrender.com/health
+
+### Build Fails on Render
+- Check Render logs for exact error
+- Common: Prisma generate not run, missing env vars
+- Fix: Add `npx prisma generate` to build command if needed

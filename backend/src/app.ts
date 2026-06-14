@@ -20,6 +20,7 @@ import { authenticate } from './middleware/auth';
 
 const app = express();
 
+// Security middleware
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -31,11 +32,25 @@ app.use(helmet({
   },
 }));
 
+// CORS - allow Vercel frontend and local dev
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
 
+// Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 1000,
@@ -47,16 +62,20 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+// Body parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(compression());
 
+// Logging
 app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));
 
+// Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// API routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/providers', authenticate, providerRoutes);
 app.use('/api/v1/usage', authenticate, usageRoutes);
@@ -67,7 +86,10 @@ app.use('/api/v1/teams', authenticate, teamRoutes);
 app.use('/api/v1/webhooks', authenticate, webhookRoutes);
 app.use('/api/v1/forecasts', authenticate, forecastRoutes);
 
+// Error handling
 app.use(errorHandler);
+
+// 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
