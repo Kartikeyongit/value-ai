@@ -12,11 +12,6 @@ services:
         fromDatabase:
           name: valueai-postgres
           property: connectionString
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: valueai-redis
-          property: connectionString
       - key: JWT_SECRET
         generateValue: true
       - key: ENCRYPTION_KEY
@@ -48,4 +43,3 @@ databases:
 redis:
   - name: valueai-redis
     plan: free
-    ipAllowList: []
