@@ -1,0 +1,51 @@
+services:
+  - type: web
+    name: valueai-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: DATABASE_URL
+        fromDatabase:
+          name: valueai-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: valueai-redis
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ENCRYPTION_KEY
+        generateValue: true
+    healthCheckPath: /health
+
+  - type: web
+    name: valueai-frontend
+    runtime: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://valueai-backend.onrender.com/api/v1
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://valueai-backend.onrender.com/api/*
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+databases:
+  - name: valueai-postgres
+    databaseName: valueai
+    user: valueai
+    plan: free
+
+redis:
+  - name: valueai-redis
+    plan: free
+    ipAllowList: []

@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: valueai-postgres
+    environment:
+      POSTGRES_USER: valueai
+      POSTGRES_PASSWORD: valueai_prod_2024
+      POSTGRES_DB: valueai
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/seeds:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U valueai -d valueai"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - valueai-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: valueai-redis
+    command: redis-server --requirepass valueai_redis_2024
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - valueai-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: valueai-backend
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://valueai:valueai_prod_2024@postgres:5432/valueai?schema=public
+      REDIS_URL: redis://:valueai_redis_2024@redis:6379
+      JWT_SECRET: valueai_jwt_secret_key_2024_secure_random_string
+      ENCRYPTION_KEY: valueai_aes_256_encryption_key_32bytes!!
+      PORT: 3001
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - valueai-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: valueai-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - valueai-network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: valueai-nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - valueai-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  valueai-network:
+    driver: bridge
