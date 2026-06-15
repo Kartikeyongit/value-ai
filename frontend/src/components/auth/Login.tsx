@@ -79,7 +79,7 @@ export function Login() {
       {/* ========== TOP NAVIGATION ========== */}
       <nav className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-5 max-w-7xl mx-auto w-full">
         <a
-          href="/"
+          href="https://value-ai-spa-sepia.vercel.app/"
           className="flex items-center gap-2.5 group"
         >
           <div className="w-8 h-8 bg-[#6366f1] rounded-lg flex items-center justify-center text-white font-bold shadow-[0_0_20px_rgba(99,102,241,0.3)] group-hover:shadow-[0_0_30px_rgba(99,102,241,0.5)] transition-shadow duration-300">
@@ -99,7 +99,7 @@ export function Login() {
             <span className="hidden sm:inline">AI Spend Audit</span>
           </a>
           <a
-            href="/"
+            href="https://value-ai-spa-sepia.vercel.app/"
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-[#94a3b8] hover:text-white hover:bg-white/[0.03] transition-all duration-200"
           >
             <LayoutDashboard size={16} />
