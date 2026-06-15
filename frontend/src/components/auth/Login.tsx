@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuthStore } from "../../store/auth";
 import api from "../../lib/api";
-import { ArrowRight, Sparkles, Zap } from "lucide-react";
+import { ArrowRight, Sparkles, Zap, LayoutDashboard, BarChart3 } from "lucide-react";
 
 export function Login() {
   const [isLogin, setIsLogin] = useState(true);
@@ -37,22 +37,78 @@ export function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#020617] text-[#f8fafc] font-[Sora,sans-serif] p-4 relative overflow-hidden selection:bg-[#6366f1]/30 selection:text-white">
-      {/* Ambient background effects */}
-      <div className="absolute inset-0 pointer-events-none">
+      {/* ========== RICH BACKGROUND ========== */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Dot grid */}
         <div
-          className="absolute inset-0 opacity-[0.15]"
+          className="absolute inset-0 opacity-[0.12]"
           style={{
             backgroundImage: "radial-gradient(#334155 1px, transparent 1px)",
             backgroundSize: "32px 32px",
           }}
         />
-        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-[#6366f1]/10 rounded-full blur-[120px] animate-pulse" />
+
+        {/* Vignette: darker edges, brighter center */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#020617_70%)]" />
+
+        {/* Floating gradient orbs */}
+        <div className="absolute top-[-15%] right-[-10%] w-[600px] h-[600px] bg-[#6366f1]/[0.07] rounded-full blur-[120px] animate-float" />
         <div
-          className="absolute bottom-[-10%] left-[-5%] w-[400px] h-[400px] bg-[#22d3ee]/10 rounded-full blur-[100px] animate-pulse"
+          className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-[#22d3ee]/[0.06] rounded-full blur-[100px] animate-float"
           style={{ animationDelay: "2s" }}
+        />
+        <div
+          className="absolute top-[40%] left-[60%] w-[300px] h-[300px] bg-[#818cf8]/[0.05] rounded-full blur-[80px] animate-float"
+          style={{ animationDelay: "4s" }}
+        />
+        <div
+          className="absolute top-[10%] left-[20%] w-[250px] h-[250px] bg-[#4f46e5]/[0.06] rounded-full blur-[90px] animate-float"
+          style={{ animationDelay: "6s" }}
+        />
+
+        {/* Slow aurora sweep */}
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] opacity-30 animate-[spin_60s_linear_infinite]"
+          style={{
+            background:
+              "conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(99,102,241,0.03) 60deg, transparent 120deg, rgba(34,211,238,0.02) 180deg, transparent 240deg, rgba(99,102,241,0.03) 300deg, transparent 360deg)",
+          }}
         />
       </div>
 
+      {/* ========== TOP NAVIGATION ========== */}
+      <nav className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-5 max-w-7xl mx-auto w-full">
+        <a
+          href="/"
+          className="flex items-center gap-2.5 group"
+        >
+          <div className="w-8 h-8 bg-[#6366f1] rounded-lg flex items-center justify-center text-white font-bold shadow-[0_0_20px_rgba(99,102,241,0.3)] group-hover:shadow-[0_0_30px_rgba(99,102,241,0.5)] transition-shadow duration-300">
+            <Sparkles size={16} strokeWidth={2.5} />
+          </div>
+          <span className="text-lg font-bold tracking-tight hidden sm:inline">
+            ValueAI
+          </span>
+        </a>
+
+        <div className="flex items-center gap-1 sm:gap-3">
+          <a
+            href="/audit"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-[#94a3b8] hover:text-white hover:bg-white/[0.03] transition-all duration-200"
+          >
+            <BarChart3 size={16} className="text-[#6366f1]" />
+            <span className="hidden sm:inline">AI Spend Audit</span>
+          </a>
+          <a
+            href="/"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-[#94a3b8] hover:text-white hover:bg-white/[0.03] transition-all duration-200"
+          >
+            <LayoutDashboard size={16} />
+            <span className="hidden sm:inline">Home</span>
+          </a>
+        </div>
+      </nav>
+
+      {/* ========== MAIN CARD ========== */}
       <div
         className={`w-full max-w-md relative z-10 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
@@ -64,8 +120,12 @@ export function Login() {
             <Sparkles className="text-white" size={26} strokeWidth={2.5} />
           </div>
           <h1 className="text-3xl font-bold tracking-tight mb-2">ValueAI</h1>
-          <p className="text-[#94a3b8] text-sm font-medium">
-            AI Infrastructure Cost Optimization
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#6366f1]/10 border border-[#6366f1]/20 text-[11px] font-semibold text-[#818cf8] uppercase tracking-wider">
+            <LayoutDashboard size={12} />
+            Dashboard
+          </div>
+          <p className="text-[#94a3b8] text-sm font-medium mt-3">
+            Full-stack AI Infrastructure Analysis
           </p>
         </div>
 
