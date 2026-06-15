@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../lib/api";
-import { Lightbulb, Check, X, TrendingDown, AlertTriangle } from "lucide-react";
+import { Check, X, TrendingDown, AlertTriangle } from "lucide-react";
 
 function safeNum(v: any): number {
   if (typeof v === "number" && !isNaN(v) && isFinite(v)) return v;
