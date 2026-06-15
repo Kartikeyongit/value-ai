@@ -1,3 +1,4 @@
+import { Prisma, RecCategory, RecSeverity, RecStatus } from '@prisma/client';
 import { prisma } from '../../lib/prisma';
 import { logger } from '../../utils/logger';
 import { NormalizationEngine } from './normalization';
@@ -6,6 +7,8 @@ import { subDays } from 'date-fns';
 export class RecommendationEngine {
   static async generateRecommendations(orgId: string) {
     const since = subDays(new Date(), 30);
+
+    const recommendations: Prisma.RecommendationCreateInput[] = [];
     const usageByModel = await prisma.$queryRaw`
       SELECT 
         model_name,
@@ -20,7 +23,6 @@ export class RecommendationEngine {
       ORDER BY total_cost DESC
     `;
 
-    const recommendations = [];
     const models = usageByModel as any[];
     const totalSpend = models.reduce((sum, m) => sum + Number(m.total_cost), 0);
 
@@ -32,20 +34,21 @@ export class RecommendationEngine {
         if (potentialSavings > 50) {
           recommendations.push({
             orgId,
-            category: 'MODEL_DOWNGRADE',
-            severity: potentialSavings > 500 ? 'HIGH' : 'MEDIUM',
+            category: RecCategory.MODEL_DOWNGRADE,
+            severity: potentialSavings > 500 ? RecSeverity.HIGH : RecSeverity.MEDIUM,
             title: `Switch from ${model.model_name} to ${cheaper.modelName}`,
             description: `${model.model_name} costs $${currentPrice.toFixed(4)} per token. ${cheaper.modelName} at ${cheaper.providerName} offers comparable quality at lower rates.`,
-            currentMonthlyCost: Number(model.total_cost),
-            recommendedMonthlyCost: Number(model.total_cost) * 0.7,
-            monthlySavings: potentialSavings,
-            savingsPercent: 30,
+            currentMonthlyCost: new Prisma.Decimal(Number(model.total_cost)),
+            recommendedMonthlyCost: new Prisma.Decimal(Number(model.total_cost) * 0.7),
+            monthlySavings: new Prisma.Decimal(potentialSavings),
+            annualSavings: new Prisma.Decimal(potentialSavings * 12),
+            savingsPercent: new Prisma.Decimal(30),
             currentProvider: model.provider_id,
             recommendedProvider: cheaper.providerId,
             currentModel: model.model_name,
             recommendedModel: cheaper.modelName,
-            confidenceScore: 0.85,
-            status: 'ACTIVE',
+            confidenceScore: new Prisma.Decimal(0.85),
+            status: RecStatus.ACTIVE,
             evidence: [{ type: 'cost_comparison', data: model }],
           });
         }
@@ -55,16 +58,17 @@ export class RecommendationEngine {
     if (totalSpend > 5000) {
       recommendations.push({
         orgId,
-        category: 'VOLUME_DISCOUNT',
-        severity: 'HIGH',
+        category: RecCategory.VOLUME_DISCOUNT,
+        severity: RecSeverity.HIGH,
         title: 'Enterprise tier volume discount available',
         description: `Your monthly spend of $${totalSpend.toFixed(2)} qualifies for enterprise pricing. Typical discounts are 15-40%.`,
-        currentMonthlyCost: totalSpend,
-        recommendedMonthlyCost: totalSpend * 0.75,
-        monthlySavings: totalSpend * 0.25,
-        savingsPercent: 25,
-        confidenceScore: 0.9,
-        status: 'ACTIVE',
+        currentMonthlyCost: new Prisma.Decimal(totalSpend),
+        recommendedMonthlyCost: new Prisma.Decimal(totalSpend * 0.75),
+        monthlySavings: new Prisma.Decimal(totalSpend * 0.25),
+        annualSavings: new Prisma.Decimal(totalSpend * 0.25 * 12),
+        savingsPercent: new Prisma.Decimal(25),
+        confidenceScore: new Prisma.Decimal(0.9),
+        status: RecStatus.ACTIVE,
         evidence: [{ monthlySpend: totalSpend }],
       });
     }
@@ -73,16 +77,17 @@ export class RecommendationEngine {
     if (providerIds.length > 2) {
       recommendations.push({
         orgId,
-        category: 'DUPLICATE_USAGE',
-        severity: 'MEDIUM',
+        category: RecCategory.DUPLICATE_USAGE,
+        severity: RecSeverity.MEDIUM,
         title: 'Consolidate providers for better rates',
         description: `Using ${providerIds.length} providers fragments volume and prevents tier discounts. Consider consolidating to 2 primary providers.`,
-        currentMonthlyCost: totalSpend,
-        recommendedMonthlyCost: totalSpend * 0.9,
-        monthlySavings: totalSpend * 0.1,
-        savingsPercent: 10,
-        confidenceScore: 0.7,
-        status: 'ACTIVE',
+        currentMonthlyCost: new Prisma.Decimal(totalSpend),
+        recommendedMonthlyCost: new Prisma.Decimal(totalSpend * 0.9),
+        monthlySavings: new Prisma.Decimal(totalSpend * 0.1),
+        annualSavings: new Prisma.Decimal(totalSpend * 0.1 * 12),
+        savingsPercent: new Prisma.Decimal(10),
+        confidenceScore: new Prisma.Decimal(0.7),
+        status: RecStatus.ACTIVE,
         evidence: [{ providerCount: providerIds.length }],
       });
     }

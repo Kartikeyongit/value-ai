@@ -17,6 +17,8 @@ export class ProviderService {
         credentialId,
         status: 'running',
         startedAt: new Date(),
+        recordsProcessed: 0,
+        recordsInserted: 0,
       },
     });
 

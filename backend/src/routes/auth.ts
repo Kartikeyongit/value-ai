@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
@@ -22,7 +22,7 @@ const registerSchema = z.object({
   orgName: z.string().optional(),
 });
 
-router.post('/register', asyncHandler(async (req, res) => {
+router.post('/register', asyncHandler(async (req: Request, res: Response) => {
   const data = registerSchema.parse(req.body);
   
   const existing = await prisma.user.findUnique({ where: { email: data.email } });
@@ -61,7 +61,7 @@ router.post('/register', asyncHandler(async (req, res) => {
   res.status(201).json({ user, token });
 }));
 
-router.post('/login', asyncHandler(async (req, res) => {
+router.post('/login', asyncHandler(async (req: Request, res: Response) => {
   const data = loginSchema.parse(req.body);
   
   const user = await prisma.user.findUnique({ where: { email: data.email } });

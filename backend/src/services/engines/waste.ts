@@ -19,7 +19,7 @@ export class WasteDetectionEngine {
 
     for (const cred of unusedCredentials as any[]) {
       detections.push({
-        orgId, detectionType: 'unused', severity: 'MEDIUM',
+        orgId, detectionType: 'unused', severity: 'MEDIUM' as const,
         providerId: cred.provider_id, credentialId: cred.id,
         title: `Unused ${cred.provider_name} integration`,
         description: `No sync activity for 14+ days. Consider removing this integration.`,
@@ -43,7 +43,7 @@ export class WasteDetectionEngine {
 
     for (const model of overProvisioned as any[]) {
       detections.push({
-        orgId, detectionType: 'over_provisioned', severity: 'HIGH',
+        orgId, detectionType: 'over_provisioned', severity: 'HIGH' as const,
         modelId: model.model_name,
         title: `Over-provisioned: ${model.model_name}`,
         description: `Low usage (${model.request_count} requests) but high cost ($${Number(model.total_cost).toFixed(2)}). Consider downgrading.`,

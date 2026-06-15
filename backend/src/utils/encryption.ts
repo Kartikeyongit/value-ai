@@ -4,14 +4,12 @@ const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'default_key_32bytes_for_de
 
 export function encrypt(text: string): string {
   return CryptoJS.AES.encrypt(text, ENCRYPTION_KEY, {
-    mode: CryptoJS.mode.GCM,
     padding: CryptoJS.pad.Pkcs7,
   }).toString();
 }
 
 export function decrypt(encryptedText: string): string {
   const bytes = CryptoJS.AES.decrypt(encryptedText, ENCRYPTION_KEY, {
-    mode: CryptoJS.mode.GCM,
     padding: CryptoJS.pad.Pkcs7,
   });
   return bytes.toString(CryptoJS.enc.Utf8);
@@ -23,5 +21,5 @@ export function hashKey(key: string): string {
 
 export function maskKey(key: string): string {
   if (key.length <= 8) return '*'.repeat(key.length);
-  return key.slice(0, 4) + '••••••••' + key.slice(-4);
+  return key.slice(0, 4) + 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½' + key.slice(-4);
 }
