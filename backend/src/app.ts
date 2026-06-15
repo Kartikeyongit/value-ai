@@ -32,16 +32,18 @@ app.use(helmet({
   },
 }));
 
-// CORS - allow Vercel frontend and local dev
+// CORS - allow Vercel frontend, preview URLs, and local dev
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
-  process.env.FRONTEND_URL,
+  ...(process.env.FRONTEND_URL?.split(',').map((url) => url.trim()) || []),
 ].filter(Boolean);
+
+const vercelPreviewOrigin = /^https:\/\/[A-Za-z0-9-]+\.vercel\.app$/;
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin) || vercelPreviewOrigin.test(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
