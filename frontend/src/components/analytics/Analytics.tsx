@@ -231,8 +231,8 @@ export function Analytics() {
                   <ZAxis type="number" dataKey="requestCount" range={[20, 80]} />
                   <Tooltip content={<ScatterTooltip />} cursor={{ stroke: "#6366f1", strokeWidth: 1, strokeDasharray: "4 4" }} />
                   <Scatter data={scatterData} shape="circle">
-                    {scatterData.map((i) => (
-                      <Cell key={`cell-${i}`} fill={SCATTER_COLORS[i % SCATTER_COLORS.length]} />
+                    {scatterData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={SCATTER_COLORS[index % SCATTER_COLORS.length]} />
                     ))}
                   </Scatter>
                 </ScatterChart>

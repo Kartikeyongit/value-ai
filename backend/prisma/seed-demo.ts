@@ -403,12 +403,14 @@ async function main() {
     GROUP BY DATE(timestamp) ORDER BY date ASC
   `;
 
-  const dailyCosts = (dailySpend as any[]).map(d => Number(d.cost));
-  const avgDaily = dailyCosts.reduce((a, b) => a + b, 0) / dailyCosts.length;
+  const dailyCosts = (dailySpend as any[]).map(d => Number(d.cost)).filter((value) => Number.isFinite(value));
+  const avgDaily = dailyCosts.length > 0 ? dailyCosts.reduce((a, b) => a + b, 0) / dailyCosts.length : 0;
   const trend = 0.02; // 2% daily growth trend
 
   for (let i = 1; i <= 30; i++) {
-    const projected = avgDaily * Math.pow(1 + trend, i);
+    const projected = Number.isFinite(avgDaily)
+      ? avgDaily * Math.pow(1 + trend, i)
+      : 0;
     const variance = projected * 0.15;
     forecasts.push({
       orgId: org.id,
