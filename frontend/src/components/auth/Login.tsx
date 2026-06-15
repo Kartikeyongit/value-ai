@@ -116,10 +116,6 @@ export function Login() {
       >
         {/* Logo lockup */}
         <div className="text-center mb-10">
-          <div className="w-14 h-14 bg-[#6366f1] rounded-xl flex items-center justify-center mx-auto mb-5 shadow-[0_0_40px_rgba(99,102,241,0.3)] hover:shadow-[0_0_60px_rgba(99,102,241,0.45)] transition-shadow duration-500">
-            <Sparkles className="text-white" size={26} strokeWidth={2.5} />
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">ValueAI</h1>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#6366f1]/10 border border-[#6366f1]/20 text-[11px] font-semibold text-[#818cf8] uppercase tracking-wider">
             <LayoutDashboard size={12} />
             Dashboard
