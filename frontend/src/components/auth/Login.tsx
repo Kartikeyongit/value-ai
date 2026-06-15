@@ -92,7 +92,7 @@ export function Login() {
 
         <div className="flex items-center gap-1 sm:gap-3">
           <a
-            href="/audit"
+            href="https://ai-spend-audit-taupe.vercel.app/"
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-[#94a3b8] hover:text-white hover:bg-white/[0.03] transition-all duration-200"
           >
             <BarChart3 size={16} className="text-[#6366f1]" />
